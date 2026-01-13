@@ -1,59 +1,50 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const todoInput = document.getElementById("todo-input");
-    const addBtn = document.getElementById("add-btn");
-    const todoList = document.getElementById("todo-list");
+    const cityInput = document.getElementById('city-input');
+    const weatherBtn = document.getElementById('get-weather-btn');
+    const weatherInfo = document.getElementById('weather-info');
+    const cityName = document.getElementById('city-name');
+    const temperature = document.getElementById('temperature');
+    const description = document.getElementById('description');
+    const errorMessage = document.getElementById('error-message');
 
-    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    tasks.forEach(task => renderTask(task));
+    const API_KEY = "3607d3bdf6abb9593630dd13ee2ed8b4";
 
-    addBtn.addEventListener("click", () => {
-        const taskText = todoInput.value.trim();
-        if (taskText === "") {
-            return;
+    weatherBtn.addEventListener('click', async () => {
+        const city = cityInput.value.trim();
+        if (!city) return;
+
+        try {
+            const weatherData = await fetchWeatherData(city);
+            displayWeather(weatherData);
+        } catch (error) {
+            showError();
         }
-        const newTask = {
-            id: Date.now(), // date.now is used to generate unique ids based on timestamp
-            text: taskText,
-            completed: false
-        };
-        tasks.push(newTask);
-        savetasks();
-        renderTask(newTask);
-        todoInput.value = ""; // Clear input field
-        console.log(tasks);
     });
 
-    function renderTask(task) {
-        const li=document.createElement("li");
-        li.classList.add("task");
-        li.setAttribute("data-id",task.id);
-        if (task.completed) {
-            li.classList.add("completed");
+    async function fetchWeatherData(city) {
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error("City not found");
         }
 
-        li.innerHTML = `
-         <span> ${task.text} </span>
-         <button class="delete-btn">Delete</button>
-        `;
-
-        li.addEventListener("click", (e) => {
-            if (e.target.tagName === "BUTTON") return; // Ignore clicks on delete button
-            task.completed = !task.completed;
-            li.classList.toggle("completed");
-            savetasks();
-        });
-
-        li.querySelector("button").addEventListener("click", (e) => {
-            e.stopPropagation(); // Prevent triggering the li click event
-            tasks = tasks.filter( t => t.id !== task.id);
-            li.remove();
-            savetasks();
-        });
-        
-        todoList.appendChild(li);
+        const data = await response.json();
+        return data;
     }
 
-    function savetasks() {
-        localStorage.setItem("tasks", JSON.stringify(tasks)); // Save tasks to local storage
+    function displayWeather(weather) {
+        cityName.textContent = weather.name;
+        temperature.textContent = `${weather.main.temp} °C`;
+        description.textContent = weather.weather[0].description;
+
+        weatherInfo.classList.remove('hidden');
+        errorMessage.classList.add('hidden');
+    }
+
+    function showError() {
+        weatherInfo.classList.add('hidden');
+        errorMessage.classList.remove('hidden');
     }
 });
