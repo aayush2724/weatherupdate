@@ -1,0 +1,19 @@
+What an API usually has?
+
+Think of an API as having rules 📜
+
+->URL – where to ask
+
+->Method – what kind of action
+
+->Data – what you send / receive
+
+
+Common API actions (verbs):
+
+| Method | Meaning     |
+| ------ | ----------- |
+| GET    | get data    |
+| POST   | send data   |
+| PUT    | update data |
+| DELETE | remove data |
